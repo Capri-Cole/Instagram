@@ -21,12 +21,20 @@ class CommentViewController: UIViewController {
 
         // Do any additional setup after loading the view.
         
+        //背景をタップしたらdismissKeyboardを呼ぶ
+        let tapGesture: UITapGestureRecognizer = UITapGestureRecognizer(target:self, action:#selector(dismissKeyboard))
+        self.view.addGestureRecognizer(tapGesture)
+        
         //テキストビューの枠線の設定
         textView.layer.borderWidth = 1.0
         textView.layer.cornerRadius = 5.0
         textView.layer.borderColor = UIColor(red: 0.9, green: 0.9, blue: 0.9, alpha: 1.0).cgColor
     }
     
+    @objc func dismissKeyboard() {
+        //キーボードを閉じる
+        view.endEditing(true)
+    }
     //投稿ボタン押下時処理
     @IBAction func handleCommentPost(_ sender: Any) {
         

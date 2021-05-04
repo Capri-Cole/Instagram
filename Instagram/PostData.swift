@@ -17,6 +17,7 @@ class PostData: NSObject {
     var isLiked: Bool = false
     var uid: String?
     var comments: [[String:String]] = []
+    var isCommented: Bool = false
     
     init(document: QueryDocumentSnapshot) {
         self.id = document.documentID
@@ -52,6 +53,11 @@ class PostData: NSObject {
             }
             
             self.comments = comments
+        }
+        
+        //コメントがある場合、trueを設定
+        if self.comments.count > 0 {
+            self.isCommented = true
         }
         
     }

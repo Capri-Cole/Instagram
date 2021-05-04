@@ -51,48 +51,60 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                    return postData
                 }
                 
-                //コメントがある最終インデックスを格納する用
-                var lastIndex = self.postArray.count
-
-                //postArray分ループ
-                for i in 0 ..< self.postArray.count {
-                    //コメントがない場合、最終インデックスを-1する
-                    if self.postArray[i].comments.count == 0 {
-                        lastIndex -= 1
+                //コメントがある最終インデックスを格納する用(初期値は-1）
+                var lastIndex = -1
+                
+                //コメントが存在する最終インデックスを求める
+                for i in (0 ..< self.postArray.count).reversed() {
+                    if self.postArray[i].isCommented == true {
+                        lastIndex = i
+                        break
                     }
+                }
+                
+                //コメントがある場合、コメント者の表示名を取得して設定。ない場合、tableViewreloadData
+                if lastIndex == -1 {
+                    self.tableView.reloadData()
+                } else {
+                    //postArray分ループ
+                    for i in 0 ..< self.postArray.count {
+                        
+                        //コメント分ループ
+                        for j in 0 ..< self.postArray[i].comments.count {
+                            print("DEBUG_PRINT: コメント分ループ j:\(j)")
+                            let commentDic = self.postArray[i].comments[j]
+                            let commentuid = commentDic["userid"]
 
-                    //コメント分ループ
-                    for j in 0 ..< self.postArray[i].comments.count {
-                        let commentDic = self.postArray[i].comments[j]
-                        let commentuid = commentDic["userid"]
+                            //useridでドキュメント取得（displaynameを取得）
+                            let profileRef = Firestore.firestore().collection(Const.ProfilePath).document(commentuid!)
 
-                        //useridでドキュメント取得（displaynameを取得）
-                        let profileRef = Firestore.firestore().collection(Const.ProfilePath).document(commentuid!)
+                            profileRef.getDocument { (document, error) in
+                                if let error = error {
+                                    print("DEBUG_PRINT: getDocumentの取得が失敗しました。\(error)")
+                                    return
+                                }
 
-                        profileRef.getDocument { (document, error) in
-                            if let error = error {
-                                print("DEBUG_PRINT: getDocumentの取得が失敗しました。\(error)")
-                                return
-                            }
+                                if let document = document, document.exists {
+                                    if let profileDic = document.data() {
+                                        //コメント辞書配列にdisplayname要素を追加
+                                        let displayName = profileDic["displayname"] as? String
+                                        self.postArray[i].comments[j]["displayname"] = displayName!
 
-                            if let document = document, document.exists {
-                                if let profileDic = document.data() {
-                                    //コメント辞書配列にdisplayname要素を追加
-                                    let displayName = profileDic["displayname"] as? String
-                                    self.postArray[i].comments[j]["displayname"] = displayName!
+                                        //コメントがある最終インデックスかつ最後のコメントにdisplaynameが設定されている場合、tableView最新化
+                                        if self.postArray[lastIndex].comments[self.postArray[lastIndex].comments.count - 1]["displayname"] != "" {
+                                            print("DEBUG_PRINT: reloadData1")
+                                            self.tableView.reloadData()
+                                        }
+                                    }
+                                } else {
+                                    //displaynameを取得できなかった（ドキュメントが存在しない）場合空白を設定
+                                    self.postArray[i].comments[j]["displayname"] = "NoName"
 
                                     //コメントがある最終インデックスかつ最後のコメントにdisplaynameが設定されている場合、tableView最新化
                                     if self.postArray[lastIndex].comments[self.postArray[lastIndex].comments.count - 1]["displayname"] != "" {
+                                        print("DEBUG_PRINT: reloadData2")
                                         self.tableView.reloadData()
                                     }
-                                }
-                            } else {
-                                //displaynameを取得できなかった（ドキュメントが存在しない）場合空白を設定
-                                self.postArray[i].comments[j]["displayname"] = "NoName"
-
-                                //コメントがある最終インデックスかつ最後のコメントにdisplaynameが設定されている場合、tableView最新化
-                                if self.postArray[lastIndex].comments[self.postArray[lastIndex].comments.count - 1]["displayname"] != "" {
-                                    self.tableView.reloadData()
                                 }
                             }
                         }
