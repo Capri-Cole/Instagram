@@ -47,12 +47,14 @@ class CommentViewController: UIViewController {
         }
         
         //コメントデータを登録する
-        if let myid = Auth.auth().currentUser?.uid {
-            let postRef = Firestore.firestore().collection(Const.PostPath).document(postData.id)
-            let commentData = ["userid": myid, "comment": textView.text!]
-            let updateValue = FieldValue.arrayUnion([commentData])
+        let user = Auth.auth().currentUser
+        let myid = user?.uid
+        let name = user?.displayName
+        let postRef = Firestore.firestore().collection(Const.PostPath).document(postData.id)
+        let commentData = ["userid": myid!, "comment": textView.text!, "name": name!]
+        let updateValue = FieldValue.arrayUnion([commentData])
             postRef.updateData(["comments": updateValue])
-        }
+        
         
         //HUDで完了を表示する
         SVProgressHUD.showSuccess(withStatus: "コメントしました")

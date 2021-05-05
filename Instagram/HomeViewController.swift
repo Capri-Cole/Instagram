@@ -71,7 +71,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                         
                         //コメント分ループ
                         for j in 0 ..< self.postArray[i].comments.count {
-                            print("DEBUG_PRINT: コメント分ループ j:\(j)")
+                            
                             let commentDic = self.postArray[i].comments[j]
                             let commentuid = commentDic["userid"]
 
@@ -97,8 +97,8 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                                         }
                                     }
                                 } else {
-                                    //displaynameを取得できなかった（ドキュメントが存在しない）場合空白を設定
-                                    self.postArray[i].comments[j]["displayname"] = "NoName"
+                                    //displaynameを取得できなかった（ドキュメントが存在しない）場合コメント投稿時のnameを設定
+                                    self.postArray[i].comments[j]["displayname"] = self.postArray[i].comments[j]["name"]
 
                                     //コメントがある最終インデックスかつ最後のコメントにdisplaynameが設定されている場合、tableView最新化
                                     if self.postArray[lastIndex].comments[self.postArray[lastIndex].comments.count - 1]["displayname"] != "" {
